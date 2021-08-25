@@ -10,6 +10,7 @@ pub struct DB {
 
 impl DB {
     pub async fn connect() -> Result<Self, StdErr> {
+        println!("{}", std::env::var("DATABASE_URL").unwrap().to_string());
         let db_url = std::env::var("DATABASE_URL")?;
         let pool = PgPoolOptions::new().connect(&db_url).await?;
         Ok(DB { pool })

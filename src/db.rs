@@ -1,3 +1,4 @@
+use crate::web::Json;
 use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
 use crate::model::Movie;
 use crate::StdErr;
@@ -21,10 +22,10 @@ impl DB {
         Ok(movies)
     }
 
-    async fn create_movie(&self, movie: Movie) -> Result<Movie, StdErr> {
+    pub async fn create_movie(&self, movie: Json<Movie>) -> Result<Movie, StdErr> {
         let created_movie = sqlx::query_as("INSERT INTO movies (title, poster_url) VALUES ($1, $2) RETURNING *")
             .bind(&movie.title)
-            .bind(movie.poster_url)
+            .bind(&movie.poster_url)
             .fetch_one(&self.pool)
             .await?;
         Ok(created_movie)

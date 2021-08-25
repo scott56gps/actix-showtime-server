@@ -1,5 +1,6 @@
 use actix_web::{HttpResponse, Responder, web, http, error::InternalError, HttpServer, App};
 use web::{Json, Data, post};
+use std::env;
 
 mod db;
 mod model;
@@ -44,6 +45,11 @@ fn to_internal_error(e: StdErr) -> InternalError<StdErr> {
 async fn main() -> Result<(), StdErr> {
     dotenv::dotenv()?;
 
+    let port: u16 = env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .expect("PORT must be a number");
+
     // Initialize the database connection
     let db = DB::connect().await?;
 
@@ -55,7 +61,7 @@ async fn main() -> Result<(), StdErr> {
             .service(post_watchlist)
             .route("/echo", post().to(echo))
     })
-        .bind(("127.0.0.1", 8000))?
+        .bind(("0.0.0.0", port))?
         .run()
         .await?;
 

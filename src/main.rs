@@ -43,10 +43,10 @@ fn to_internal_error(e: StdErr) -> InternalError<StdErr> {
 
 #[actix_web::main]
 async fn main() -> Result<(), StdErr> {
-    // dotenv::dotenv()?;
+    // dotenv::dotenv()?; // Uncomment for local dev environment vars
 
     let port: u16 = env::var("PORT")
-        .unwrap_or_else(|_| "3000".to_string())
+        .unwrap_or_else(|_| "8000".to_string())
         .parse()
         .expect("PORT must be a number");
 

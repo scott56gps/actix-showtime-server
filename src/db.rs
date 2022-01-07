@@ -30,4 +30,12 @@ impl DB {
             .await?;
         Ok(created_movie)
     }
+
+    pub async fn delete_movie(&self, id: i32) -> Result<(), StdErr> {
+	sqlx::query("DELETE FROM movies WHERE id = $1")
+	    .bind(id)
+	    .execute(&self.pool)
+	    .await?;
+	Ok(())
+    }
 }

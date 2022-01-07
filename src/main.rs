@@ -1,11 +1,11 @@
-use actix_web::{HttpResponse, Responder, web, http, error::InternalError, HttpServer, App};
-use web::{Json, Data, post};
+use actix_web::{HttpResponse, Responder, web, HttpServer, App};
+use web::{post};
 use std::env;
 
 mod db;
 mod model;
+mod routes;
 use crate::db::DB;
-use crate::model::Movie;
 
 type StdErr = Box<dyn std::error::Error>;
 
@@ -16,29 +16,6 @@ async fn hello() -> impl Responder {
 
 async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
-}
-
-#[actix_web::get("/watchlist")]
-async fn get_watchlist(db: Data<DB>) -> Result<Json<Vec<Movie>>, InternalError<StdErr>> {
-    db.movies()
-        .await
-        .map(Json)
-        .map_err(to_internal_error)
-}
-
-#[actix_web::post("/watchlist")]
-async fn post_watchlist(db: Data<DB>, movie: Json<Movie>) -> Result<Json<Movie>, InternalError<StdErr>> {
-    println!("movie: {:#?}", movie);
-    db.create_movie(movie)
-        .await
-        .map(Json)
-        .map_err(to_internal_error)
-}
-
-// Private Functions
-fn to_internal_error(e: StdErr) -> InternalError<StdErr> {
-    println!("Received Error");
-    InternalError::new(e, http::StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 #[actix_web::main]
@@ -57,13 +34,12 @@ async fn main() -> Result<(), StdErr> {
         App::new()
             .data(db.clone())
             .service(hello)
-            .service(get_watchlist)
-            .service(post_watchlist)
             .route("/echo", post().to(echo))
+            .service(routes::api())
     })
-        .bind(("0.0.0.0", port))?
-        .run()
-        .await?;
+    .bind(("0.0.0.0", port))?
+    .run()
+    .await?;
 
     Ok(())
 }

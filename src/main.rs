@@ -30,6 +30,8 @@ async fn main() -> Result<(), StdErr> {
     // Initialize the database connection
     let db = DB::connect().await?;
 
+    println!("Now listening on port {}...", port);
+
     HttpServer::new(move || {
         App::new()
             .data(db.clone())
